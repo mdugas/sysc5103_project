@@ -1,0 +1,14 @@
+MAS sysc5103_project {
+
+	infrastructure: Centralised
+
+	agents:
+		agent1 sample_agent;
+		agent2 sample_agent;
+		agent3 sample_agent;
+		agent4 sample_agent;
+		agent5 sample_agent;
+
+	aslSourcePath:
+		"src/asl";
+}
