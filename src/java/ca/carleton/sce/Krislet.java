@@ -1,11 +1,10 @@
 package ca.carleton.sce;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.*;
 
 //***************************************************************************
@@ -28,7 +27,7 @@ class Krislet implements SendCommand {
     //private Pattern           coach_pattern   = Pattern.compile("coach");
     // constants
     private static final int    MSG_SIZE = 4096;    // Size of socket buffer
-    private final static Logger log = LoggerFactory.getLogger(Krislet.class);
+    private final static Logger LOGGER = Logger.getLogger(Krislet.class.getName());
     //===========================================================================
 
     //===========================================================================
@@ -75,19 +74,19 @@ class Krislet implements SendCommand {
             }
         }
         catch(Exception e) {
-            log.error("");
-            log.error("USAGE: krislet [-parameter value]");
-            log.error("");
-            log.error("    Parameters  value        default");
-            log.error("   ------------------------------------");
-            log.error("    host        host_name    localhost");
-            log.error("    port        port_number  6000");
-            log.error("    team        team_name    Kris");
-            log.error("");
-            log.error("    Example:");
-            log.error("      krislet -host www.host.com -port 6000 -team Poland");
-            log.error("    or");
-            log.error("      krislet -host 193.117.005.223");
+            LOGGER.log(Level.SEVERE, "");
+            LOGGER.log(Level.SEVERE, "USAGE: krislet [-parameter value]");
+            LOGGER.log(Level.SEVERE, "");
+            LOGGER.log(Level.SEVERE, "    Parameters  value        default");
+            LOGGER.log(Level.SEVERE, "   ------------------------------------");
+            LOGGER.log(Level.SEVERE, "    host        host_name    localhost");
+            LOGGER.log(Level.SEVERE, "    port        port_number  6000");
+            LOGGER.log(Level.SEVERE, "    team        team_name    Kris");
+            LOGGER.log(Level.SEVERE, "");
+            LOGGER.log(Level.SEVERE, "    Example:");
+            LOGGER.log(Level.SEVERE, "      krislet -host www.host.com -port 6000 -team Poland");
+            LOGGER.log(Level.SEVERE, "    or");
+            LOGGER.log(Level.SEVERE, "      krislet -host 193.117.005.223");
             return;
         }
 
@@ -259,7 +258,7 @@ class Krislet implements SendCommand {
             m_socket.send(packet);
         }
         catch(IOException e) {
-            log.error("socket sending error " + e);
+            LOGGER.log(Level.SEVERE, "socket sending error " + e);
         }
     }
 
@@ -273,7 +272,7 @@ class Krislet implements SendCommand {
         } catch(SocketException e){
             System.out.println("shutting down...");
         } catch(IOException e){
-            log.error("socket receiving error " + e);
+            LOGGER.log(Level.SEVERE, "socket receiving error " + e);
         }
         return new String(buffer);
     }
