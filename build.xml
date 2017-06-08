@@ -48,7 +48,7 @@
     
     <target name="jar" depends="compile">
         <mkdir dir="${basedir}/lib" />
-        <delete file="${ant.project.name}.jar" />
+        <delete file="out/${ant.project.name}.jar" />
         <copy file="${jasonJar}" tofile="out/${ant.project.name}.jar" />
         <copy file="${mas2j.project.file}" tofile="default.mas2j" />
         <jar update="yes" jarfile="out/${ant.project.name}.jar" >
