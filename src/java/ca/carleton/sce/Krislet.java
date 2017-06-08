@@ -1,7 +1,7 @@
 package ca.carleton.sce;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import java.io.*;
 import java.net.*;
@@ -13,7 +13,7 @@ import java.util.regex.*;
 //	This is main object class
 //
 //***************************************************************************
-class Krislet implements SendCommand {
+class Krislet extends Thread implements SendCommand {
     //===========================================================================
     // Private members
     // class members
@@ -28,74 +28,8 @@ class Krislet implements SendCommand {
     //private Pattern           coach_pattern   = Pattern.compile("coach");
     // constants
     private static final int    MSG_SIZE = 4096;    // Size of socket buffer
-    private final static Logger log = LoggerFactory.getLogger(Krislet.class);
+    private final static Logger LOG = Logger.getLogger(Krislet.class.getName());
     //===========================================================================
-
-    //===========================================================================
-    // Initialization member functions
-    //---------------------------------------------------------------------------
-    // The main application function.
-    // Command line format:
-    //
-    // krislet [-parameter value]
-    //
-    // Parameters:
-    //
-    //	host (default "localhost")
-    //		The host name can either be a machine name, such as "java.sun.com" 
-    //		or a string representing its IP address, such as "206.26.48.100."
-    //
-    //	port (default 6000)
-    //		Port number for communication with the server
-    //
-    //	team (default Kris)
-    //		Team name. This name can not contain spaces.
-    //
-    //	
-    public static void main(String a[]) throws IOException {
-        String	hostName = "";
-        int	    port = 6000;
-        String	team = "Krislet3";
-
-        try {
-            // First look for parameters
-            for( int c = 0 ; c < a.length ; c += 2 ) {
-                if( a[c].compareTo("-host") == 0 ) {
-                    hostName = a[c+1];
-                }
-                else if( a[c].compareTo("-port") == 0 ) {
-                    port = Integer.parseInt(a[c+1]);
-                }
-                else if( a[c].compareTo("-team") == 0 ) {
-                    team = a[c+1];
-                }
-                else {
-                    throw new Exception();
-                }
-            }
-        }
-        catch(Exception e) {
-            log.error("");
-            log.error("USAGE: krislet [-parameter value]");
-            log.error("");
-            log.error("    Parameters  value        default");
-            log.error("   ------------------------------------");
-            log.error("    host        host_name    localhost");
-            log.error("    port        port_number  6000");
-            log.error("    team        team_name    Kris");
-            log.error("");
-            log.error("    Example:");
-            log.error("      krislet -host www.host.com -port 6000 -team Poland");
-            log.error("    or");
-            log.error("      krislet -host 193.117.005.223");
-            return;
-        }
-
-        Krislet player = new Krislet(InetAddress.getByName(hostName), port, team);
-
-        // enter main loop
-        player.mainLoop();
-    }  
 
     //---------------------------------------------------------------------------
     // This constructor opens a socket to connect with the server
@@ -105,6 +39,25 @@ class Krislet implements SendCommand {
         m_port = port;
         m_team = team;
         m_playing = true;
+        
+        byte[] buffer = new byte[MSG_SIZE];
+        DatagramPacket packet = new DatagramPacket(buffer, MSG_SIZE);
+        
+        // first we need to initialize the connection with the server
+        init();
+        
+        
+        try {
+            m_socket.receive(packet);
+            parseInitCommand(new String(buffer));
+            m_port = packet.getPort();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            LOG.log(Level.SEVERE, "Can't receive transmission from server.", e);
+        }
+        
+        start();
+        
     }
 
     //---------------------------------------------------------------------------
@@ -118,30 +71,36 @@ class Krislet implements SendCommand {
     // Protected member functions
     //---------------------------------------------------------------------------
     // This is main loop for player
-    protected void mainLoop() throws IOException {
-        byte[] buffer = new byte[MSG_SIZE];
-        DatagramPacket packet = new DatagramPacket(buffer, MSG_SIZE);
+//    protected void mainLoop() throws IOException {
 
-        // first we need to initialize the connection with the server
-        init();
+//
+//        // Now we should be connected to the server
+//        // and we know which side, player number and play mode
+//        while( m_playing ) {
+//            parseSensorInformation(receive());
+//        }
+//    }
+//
 
-        m_socket.receive(packet);
-        parseInitCommand(new String(buffer));
-        m_port = packet.getPort();
-
-        // Now we should be connected to the server
-        // and we know which side, player number and play mode
-        while( m_playing ) {
-            parseSensorInformation(receive());
+    public void run() {
+        while(m_playing) {
+            try {
+                LOG.info("Saving state to memory.");
+                parseSensorInformation(receive());
+                Thread.sleep(500);
+            } catch (IOException | InterruptedException e) {
+                // TODO Auto-generated catch block
+                LOG.log(Level.SEVERE, "Can't receive transmission from server.", e);
+            }
         }
     }
-
-
+    
     //===========================================================================
     // Implementation of ca.carleton.sce.SendCommand Interface
     //---------------------------------------------------------------------------
     // This function sends `move` command to the server
     public void move(double x, double y) {
+        LOG.info("Sent move command!");
         send("(move " + Double.toString(x) + " " + Double.toString(y) + ")");
     }
 
@@ -193,12 +152,21 @@ class Krislet implements SendCommand {
             throw new IOException(message);
         }
 
+        LOG.info("Initializing the brain.");
         // initialize player's brain
         m_brain = new Brain(this, m_team, m.group(1).charAt(0), Integer.parseInt(m.group(2)), m.group(3));
+        LOG.info("Brain initialized");
     }
 
-
-
+    //---------------------------------------------------------------------------
+    /* This function returns the player's brain for the agent to use with 
+     * the Jason framework.
+     */
+    public Brain getBrain(){
+        while(m_brain == null);
+        return (Brain) m_brain;
+    }
+    
     //===========================================================================
     // Collection of communication functions
     //---------------------------------------------------------------------------
@@ -259,7 +227,7 @@ class Krislet implements SendCommand {
             m_socket.send(packet);
         }
         catch(IOException e) {
-            log.error("socket sending error " + e);
+            LOG.log(Level.SEVERE, "socket sending error ", e);
         }
     }
 
@@ -273,7 +241,7 @@ class Krislet implements SendCommand {
         } catch(SocketException e){
             System.out.println("shutting down...");
         } catch(IOException e){
-            log.error("socket receiving error " + e);
+            LOG.log(Level.SEVERE, "socket receiving error ", e);
         }
         return new String(buffer);
     }

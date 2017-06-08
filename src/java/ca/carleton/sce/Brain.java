@@ -1,9 +1,12 @@
 package ca.carleton.sce;
 
 import java.lang.Math;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
 import java.util.regex.*;
 
-class Brain extends Thread implements SensorInput {
+class Brain implements SensorInput {
     //===========================================================================
     // Private members
     private SendCommand         m_krislet;          // robot which is controlled by this brain
@@ -11,6 +14,8 @@ class Brain extends Thread implements SensorInput {
     private char                m_side;
     volatile private boolean    m_timeOver;
     private String              m_playMode;
+    
+    private static final Logger LOG = Logger.getLogger(Brain.class.getName());
 
     //---------------------------------------------------------------------------
     // This constructor:
@@ -24,7 +29,7 @@ class Brain extends Thread implements SensorInput {
         m_side = side;
         // m_number = number;
         m_playMode = playMode;
-        start();
+        
     }
 
 
@@ -52,66 +57,106 @@ class Brain extends Thread implements SensorInput {
     // Move to a place on my side on a kick_off
     // ************************************************
 
-    public void run() {
-        ObjectInfo object;
+//    public void run() {
+//        ObjectInfo object;
+//
+//        // first put it somewhere on my side
+//        if(Pattern.matches("^before_kick_off.*",m_playMode)) {
+//            m_krislet.move(-Math.random() * 52.5, 34 - Math.random() * 68.0);
+//        }
+//
+//        while( !m_timeOver ) {
+//            object = m_memory.getObject("ball");
+//            if( object == null ) {
+//                // If you don't know where is ball then find it
+//                m_krislet.turn(40);
+//                m_memory.waitForNewInfo();
+//            }
+//            else if( object.m_distance > 1.0 ) {
+//                // If ball is too far then
+//                // turn to ball or
+//                // if we have correct direction then go to ball
+//                if( object.m_direction != 0 ) {
+//                    m_krislet.turn(object.m_direction);
+//                }
+//                else {
+//                    m_krislet.dash(10 * object.m_distance);
+//                }
+//            }
+//            else {
+//                // We know where is ball and we can kick it
+//                // so look for goal
+//                if( m_side == 'l' ) {
+//                    object = m_memory.getObject("goal r");
+//                }
+//                else {
+//                    object = m_memory.getObject("goal l");
+//                }
+//
+//                if( object == null ) {
+//                    m_krislet.turn(40);
+//                    m_memory.waitForNewInfo();
+//                }
+//                else {
+//                    m_krislet.kick(100, object.m_direction);
+//                }
+//            }
+//
+//            // sleep one step to ensure that we will not send
+//            // two commands in one cycle.
+//            try {
+//                Thread.sleep(2*SoccerParams.simulator_step);
+//            } catch(Exception e){
+//                // Do nothing if an exception is caught
+//            }
+//        }
+//        m_krislet.bye();
+//    }
 
-        // first put it somewhere on my side
-        if(Pattern.matches("^before_kick_off.*",m_playMode)) {
-            m_krislet.move(-Math.random() * 52.5, 34 - Math.random() * 68.0);
+    public List<String> getSensors() {
+        ArrayList<String> sensors = new ArrayList<>();
+        
+        // Body, Ball and Goal objects
+        ObjectInfo body_object = m_memory.getObject("body");
+        ObjectInfo ball_object = m_memory.getObject("ball");
+        ObjectInfo goal_object;
+        
+        //Get ball related sensor inputs
+        if( ball_object != null ) {
+            sensors.add("seeball");
+            if(ball_object.m_distance <= 1.0) {
+                sensors.add("inkickrange");
+            }
+            if(ball_object.m_direction == 0) {
+                sensors.add("ballcentered");
+            }
         }
 
-        while( !m_timeOver ) {
-            object = m_memory.getObject("ball");
-            if( object == null ) {
-                // If you don't know where is ball then find it
-                m_krislet.turn(40);
-                m_memory.waitForNewInfo();
-            }
-            else if( object.m_distance > 1.0 ) {
-                // If ball is too far then
-                // turn to ball or
-                // if we have correct direction then go to ball
-                if( object.m_direction != 0 ) {
-                    m_krislet.turn(object.m_direction);
-                }
-                else {
-                    m_krislet.dash(10 * object.m_distance);
-                }
-            }
-            else {
-                // We know where is ball and we can kick it
-                // so look for goal
-                if( m_side == 'l' ) {
-                    object = m_memory.getObject("goal r");
-                }
-                else {
-                    object = m_memory.getObject("goal l");
-                }
-
-                if( object == null ) {
-                    m_krislet.turn(40);
-                    m_memory.waitForNewInfo();
-                }
-                else {
-                    m_krislet.kick(100, object.m_direction);
-                }
-            }
-
-            // sleep one step to ensure that we will not send
-            // two commands in one cycle.
-            try {
-                Thread.sleep(2*SoccerParams.simulator_step);
-            } catch(Exception e){
-                // Do nothing if an exception is caught
-            }
+        
+        //Get goal related sensor inputs
+        if( m_side == 'l' ) {
+            goal_object = m_memory.getObject("goal r");
         }
-        m_krislet.bye();
+        else {
+            goal_object = m_memory.getObject("goal l");
+        }
+        if( goal_object != null ) {
+            sensors.add("seegoal");
+        }
+       
+        
+        return sensors;
     }
-
+    
+    public boolean isTimeOver() {
+        return m_timeOver;
+    }
 
     //===========================================================================
     // Here are supporting functions for implement logic
-
+    public String getPlayMode() {
+        return this.m_playMode;
+    }
 
     //===========================================================================
     // Implementation of SensorInput Interface
