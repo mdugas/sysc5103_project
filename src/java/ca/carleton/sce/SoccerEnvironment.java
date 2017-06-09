@@ -9,7 +9,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import jason.NoValueException;
 import jason.asSyntax.Literal;
+import jason.asSyntax.NumberTerm;
 import jason.asSyntax.Structure;
 import jason.environment.Environment;
 
@@ -21,10 +23,17 @@ public class SoccerEnvironment extends Environment {
     private Brain brain;
     
     @Override
-    public void init(String[] args) {  
+    public void init(String[] args) {
+        super.init(args);
+
+        String	hostName = "192.168.0.22";
+        int	    port = 6000;
+        String	team = "Raven";
+
         try {
             LOG.info("Initializing phase");
-            player = new Krislet(InetAddress.getByName(""), 6000, "Raven");
+            LOG.info(hostName);
+            player = new Krislet(InetAddress.getByName(hostName), port, team);
             brain = player.getBrain();
             LOG.info("Initialized");
         } catch (SocketException | UnknownHostException e) {
@@ -47,12 +56,22 @@ public class SoccerEnvironment extends Environment {
                 break;
             
             case "align":
-            	player.turn(brain.getBallDirection());
+                double moment = 40;
+                try {
+                    moment = ((NumberTerm) action.getTerm(0)).solve();
+                } catch (NoValueException e) {
+                }
+                player.turn(moment);
             	returnValue = true;
             	break;
             	
             case "dash":
-            	player.dash(10*brain.getBallDistance());
+                double distance = 1;
+                try {
+                    distance = ((NumberTerm) action.getTerm(0)).solve();
+                } catch (NoValueException e) {
+                }
+                player.dash(10 * distance);
             	returnValue = true;
             	break;
                 
@@ -84,42 +103,13 @@ public class SoccerEnvironment extends Environment {
      * This method is used to send information back to the ASL environment.
      */
     void updatePercepts() {
-    	// Define the belief percepts
-    	Literal seeBall = Literal.parseLiteral("seeBall(true)");
-        Literal inKickRange = Literal.parseLiteral("inKickRange(true)");
-        Literal ballCentered = Literal.parseLiteral("ballCentered(true)");
-    	Literal seeGoal = Literal.parseLiteral("seegoal(true)");
-    	
-    	// Remove the percepts, without removing those we don't want to remove
-    	removePercept(seeBall);
-    	removePercept(inKickRange);
-    	removePercept(ballCentered);
-    	removePercept(seeGoal);
-    	
-    	// Add the percepts based on the sensors.
-        List<String> sensors = brain.getSensors();
-        for(String sensor : sensors) {
-            if(sensor == "seeball") {
-            	LOG.info("Adding Percept seeBall(true)");
-                addPercept(seeBall);
-            }
-            
-            if(sensor == "inkickrange") {
-            	LOG.info("Adding Percept inKickRange(true)");
-                addPercept(inKickRange);
-            }
-            
-            if(sensor == "ballcentered") {
-            	LOG.info("Adding Percept ballCentered(true)");
-                addPercept(ballCentered);
-            }
-            
-            if(sensor == "seegoal") {
-            	LOG.info("Adding Percept seeGoal(true)");
-                addPercept(seeGoal);
-            }
-        }
-        
+        // Remove the percepts, without removing those we don't want to remove
+        this.clearPercepts("robo");
+
+        this.brain.getPercepts().forEach(percept -> {
+            this.addPercept("robo", percept);
+            LOG.info(String.format("Adding Percept %s", percept.toString()));
+        });
     }
 
     /** Called before the end of MAS execution */
