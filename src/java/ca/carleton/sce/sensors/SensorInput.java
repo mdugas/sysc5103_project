@@ -1,6 +1,9 @@
-package ca.carleton.sce;
+package ca.carleton.sce.sensors;
 
-interface SensorInput
+import ca.carleton.sce.sensors.hearing.Message;
+import ca.carleton.sce.sensors.vision.VisualInfo;
+
+public interface SensorInput
 {
     //---------------------------------------------------------------------------
     // This function sends see information
@@ -8,9 +11,5 @@ interface SensorInput
 
     //---------------------------------------------------------------------------
     // This function receives hear information from player
-    void hear(int time, int direction, String message);
-
-    //---------------------------------------------------------------------------
-    // This function receives hear information from referee
-    void hear(int time, String message);
+    void hear(Message message);
 }

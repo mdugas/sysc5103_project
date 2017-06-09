@@ -1,19 +1,28 @@
 package ca.carleton.sce;
 
-import java.lang.Math;
+import ca.carleton.sce.sensors.SensorInfo;
+import ca.carleton.sce.sensors.SensorInput;
+import ca.carleton.sce.sensors.hearing.Message;
+import ca.carleton.sce.sensors.hearing.Sender;
+import ca.carleton.sce.sensors.vision.VisualInfo;
+import ca.carleton.sce.util.Mutex;
+import jason.asSyntax.ASSyntax;
+import jason.asSyntax.Literal;
+import jason.asSyntax.Structure;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.*;
 
 class Brain implements SensorInput {
     //===========================================================================
     // Private members
     private SendCommand         m_krislet;          // robot which is controlled by this brain
-    private Memory              m_memory;           // place where all information is stored
     private char                m_side;
     volatile private boolean    m_timeOver;
     private String              m_playMode;
+    private Mutex<SensorInfo> sensorInfo = new Mutex<>(new SensorInfo());
     
     private static final Logger LOG = Logger.getLogger(Brain.class.getName());
 
@@ -24,7 +33,6 @@ class Brain implements SensorInput {
     public Brain(SendCommand krislet, String team, char side, int number, String playMode) {
         m_timeOver = false;
         m_krislet = krislet;
-        m_memory = new Memory();
         //m_team = team;
         m_side = side;
         // m_number = number;
@@ -113,49 +121,30 @@ class Brain implements SensorInput {
 //        m_krislet.bye();
 //    }
 
-    public List<String> getSensors() {
-        ArrayList<String> sensors = new ArrayList<>();
-        
-        // Body, Ball and Goal objects
-        ObjectInfo body_object = m_memory.getObject("body");
-        ObjectInfo ball_object = m_memory.getObject("ball");
-        ObjectInfo goal_object;
-        
-        //Get ball related sensor inputs
-        if( ball_object != null ) {
-            sensors.add("seeball");
-            if(ball_object.m_distance <= 1.0) {
-                sensors.add("inkickrange");
-            }
-            if(ball_object.m_direction == 0) {
-                sensors.add("ballcentered");
-            }
+    public List<Literal> getPercepts() {
+        ArrayList<Literal> percepts = new ArrayList<>();
+
+        this.sensorInfo.lock(sensorInfo -> {
+            sensorInfo.getBallList().stream().findAny().ifPresent(ball -> {
+                percepts.add(ASSyntax.createLiteral("seeBall", ASSyntax.createNumber(ball.getDirection()), ASSyntax.createNumber(ball.getDistance())));
+                if (ball.getDistance() <= 1d) {
+                    percepts.add(Literal.parseLiteral("inKickRange(true)"));
+                }
+                if (ball.getDirection() == 0) {
+                    percepts.add(Literal.parseLiteral("ballAligned(true)"));
+                }
+            });
+
+            sensorInfo.getGoalList().stream().filter(goal -> goal.getSide() != m_side).findAny().ifPresent(goal -> percepts.add(Literal.parseLiteral("seeGoal(true)")));
+
+            sensorInfo.clear();
+        });
+
+        for (Literal s : percepts) {
+            LOG.log(Level.INFO, s.toString());
         }
 
-        
-        //Get goal related sensor inputs
-        if( m_side == 'l' ) {
-            goal_object = m_memory.getObject("goal r");
-        }
-        else {
-            goal_object = m_memory.getObject("goal l");
-        }
-        if( goal_object != null ) {
-            sensors.add("seegoal");
-        }
-       
-        
-        return sensors;
-    }
-    
-    public double getBallDirection() {
-    	ObjectInfo ball_object = m_memory.getObject("ball");    	
-    	return ball_object.m_direction;
-    }
-    
-    public double getBallDistance() {
-    	ObjectInfo ball_object = m_memory.getObject("ball");    	
-    	return ball_object.m_distance;
+        return percepts;
     }
     
     public boolean isTimeOver() {
@@ -174,21 +163,17 @@ class Brain implements SensorInput {
     //---------------------------------------------------------------------------
     // This function sends see information
     public void see(VisualInfo info) {
-        m_memory.store(info);
+        this.sensorInfo.lock(s -> s.see(info));
     }
 
 
     //---------------------------------------------------------------------------
     // This function receives hear information from player
-    public void hear(int time, int direction, String message) {
-        //Do nothing if we call this method
-    }
-
-    //---------------------------------------------------------------------------
-    // This function receives hear information from referee
-    public void hear(int time, String message) {
-        if(message.compareTo("time_over") == 0) {
+    public void hear(Message message) {
+        if (message.getSender().equals(Sender.Referee) && "time_over".equals(message.getMessage())) {
             m_timeOver = true;
+        } else {
+            this.sensorInfo.lock(s -> s.hear(message));
         }
     }
 }

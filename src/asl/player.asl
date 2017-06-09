@@ -6,66 +6,71 @@
 beforeKickoff(true).
 
 /* Initial goals */
-!play(x).
+!play.
 
 /* Plans */
 @p1
-+!play(x)
-	: beforeKickoff(true)
-	<- 
-		.print("Before Kickoff");
-		move("");
-		-beforeKickoff(true);
-		!play(true).
++!play
+    : beforeKickoff(true)
+    <-
+        .print("Before Kickoff");
+        move("");
+        -beforeKickoff(true);
+        !play.
 
 @p2			  
-+!play(x)
-	:
-		  ~seeBall(true)
-		& ~ballAligned(true)
-		& ~inKickRange(true)
++!play
+    :
+          not seeBall(M,D)
+        & not ballAligned(true)
+        & not inKickRange(true)
+    <-
+        .print("p2")
+        turn("");
+        !play.
+
+@p3
++!play
+    :
+              seeBall(M,D)
+        & not ballAligned(true)
+        & not inKickRange(true)
 	<-
+        .print("p3")
+        align(M);
+        !play.
+
+@p4
++!play
+    :
+          seeBall(M,D)
+        & ballAligned(true)
+        & not inKickRange(true)
+    <-
+        .print("p4")
+        dash(D);
+        !play.
+
+@p5
++!play
+    :
+              seeBall(M,D)
+        & not seeGoal(true)
+        &     ballAligned(true)
+        &     inKickRange(true)
+	<-
+	    .print("p5")
 		turn("");
-		!play(true).
-
-@p3		
-+!play(x)
-	:
-		   seeBall(true)
-		& ~ballAligned(true)
-		& ~inKickRange(true)
-	<-
-		align("");
-		!play(true).
-
-@p4		
-+!play(x)
-	:
-		   seeBall(true)
-		&  ballAligned(true)
-		& ~inKickRange(true)
-	<-
-		dash("");
-		!play(true).
-
-@p5		
-+!play(x)
-	:
-		   seeBall(true)
-		& ~seeGoal(true)
-		&  ballAligned(true)
-		&  inKickRange(true)
-	<-
-		turn("");
-		!play(true).
+		!play.
 
 @p6
-+!play(x)
-	:
-		   seeBall(true)
-		&  seeGoal(true)
-		&  ballAligned(true)
-		&  inKickRange(true)
-	<-
-		kick("");
-		!play(true).
++!play
+    :
+           seeBall(M,D)
+        &  seeGoal(true)
+        &  ballAligned(true)
+        &  inKickRange(true)
+    <-
+        .print("p6")
+        kick("");
+        !play.

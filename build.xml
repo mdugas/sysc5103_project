@@ -14,6 +14,9 @@
 
     <property name="mas2j.project.file" value="sysc5103_project.mas2j"/>
     <property name="debug" value=""/> <!-- use "-debug" to run in debug mode -->
+    <property name="host" value=""/>
+    <property name="port" value="6000"/>
+    <property name="team" value="Raven"/>
     <property name="build.dir" value="${basedir}/bin" />
 
     <property name="jasonJar" value="lib\jason-2.1.jar"/>
@@ -96,7 +99,11 @@
         <java classname="jason.infra.centralised.RunCentralisedMAS"
               failonerror="true" fork="yes" dir="${basedir}" >
             <classpath refid="project.classpath"/>
-            <arg line="${mas2j.project.file} ${debug} "/>
+            <arg value="${mas2j.project.file}" />
+            <arg value="${debug}"/>
+            <arg value="${host}" />
+            <arg value="${port}" />
+            <arg value="${team}" />
             <!-- jvmarg line="-Xmx500M -Xss8M"/ -->    
         </java>
         <antcall target="user-end" />

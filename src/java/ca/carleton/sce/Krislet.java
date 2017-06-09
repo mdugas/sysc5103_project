@@ -1,5 +1,10 @@
 package ca.carleton.sce;
 
+import ca.carleton.sce.sensors.SensorInput;
+import ca.carleton.sce.sensors.hearing.Message;
+import ca.carleton.sce.sensors.hearing.Sender;
+import ca.carleton.sce.sensors.vision.VisualInfo;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -20,7 +25,7 @@ class Krislet extends Thread implements SendCommand {
     private InetAddress		    m_host;         // Server address
     private int			        m_port;         // server port
     private String		        m_team;         // team name
-    private SensorInput         m_brain;        // input for sensor information
+    private SensorInput m_brain;        // input for sensor information
     private boolean             m_playing;      // controls the MainLoop
     private Pattern             message_pattern = Pattern.compile("^\\((\\w+?)\\s.*");
     private Pattern             hear_pattern    = Pattern.compile("^\\(hear\\s(\\w+?)\\s(\\w+?)\\s(.*)\\).*");
@@ -152,8 +157,7 @@ class Krislet extends Thread implements SendCommand {
             try {
                 LOGGER.info("Saving state to memory.");
                 parseSensorInformation(receive());
-                Thread.sleep(500);
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException e) {
                 // TODO Auto-generated catch block
                 LOGGER.log(Level.SEVERE, "Can't receive transmission from server.", e);
             }
@@ -249,8 +253,8 @@ class Krislet extends Thread implements SendCommand {
             throw new IOException(message);
         }
         if( m.group(1).compareTo("see") == 0 ) {
-            VisualInfo	info = new VisualInfo(message);
-            info.parse();
+            VisualInfo info = new VisualInfo();
+            info.parse(message);
             m_brain.see(info);
         }
         else if( m.group(1).compareTo("hear") == 0 ) {
@@ -263,24 +267,14 @@ class Krislet extends Thread implements SendCommand {
     // This function parses hear information
     private void parseHear(String message) throws IOException {
         // get hear information
-        Matcher m=hear_pattern.matcher(message);
-        int	time;
-        String sender;
-        String uttered;
-        if(!m.matches()) {
+        Matcher m = hear_pattern.matcher(message);
+        if (!m.matches()) {
             throw new IOException(message);
         }
-        time = Integer.parseInt(m.group(1));
-        sender = m.group(2);
-        uttered = m.group(3);
-        if( sender.compareTo("referee") == 0 ) {
-            m_brain.hear(time, uttered);
-        }
-        //else if( coach_pattern.matcher(sender).find())
-        //    m_brain.hear(time,sender,uttered);
-        else if( sender.compareTo("self") != 0 ) {
-            m_brain.hear(time, Integer.parseInt(sender), uttered);
-        }
+        int time = Integer.parseInt(m.group(1));
+        Sender sender = Sender.parse(m.group(2));
+        String uttered = m.group(3);
+        m_brain.hear(new Message(time, sender, uttered));
     }
 
     //---------------------------------------------------------------------------
