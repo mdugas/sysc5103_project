@@ -9,7 +9,7 @@
 -->
 
 <project name   ="sysc5103_project"
-         basedir=".."
+         basedir="."
          default="run">
 
     <property name="mas2j.project.file" value="sysc5103_project.mas2j"/>
