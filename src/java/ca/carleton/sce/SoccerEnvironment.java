@@ -26,7 +26,7 @@ public class SoccerEnvironment extends Environment {
     public void init(String[] args) {
         super.init(args);
 
-        String	hostName = "192.168.0.22";
+        String	hostName = "localhost";
         int	    port = 6000;
         String	team = "Raven";
 
@@ -49,7 +49,7 @@ public class SoccerEnvironment extends Environment {
         String actionString = action.getFunctor();
         LOG.info("Action: " + actionString);
         switch(actionString) {
-            
+
             case "turn":
                 player.turn(40);
                 returnValue = true;
