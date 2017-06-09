@@ -35,13 +35,26 @@ public class SoccerEnvironment extends Environment {
 
     @Override
     public boolean executeAction(String agName, Structure action) {
+        boolean returnValue = false;
+        
         String actionString = action.getFunctor();
         LOG.info("Action: " + actionString);
         switch(actionString) {
             
             case "turn":
                 player.turn(40);
-                return true;
+                returnValue = true;
+                break;
+            
+            case "align":
+            	player.turn(brain.getBallDirection());
+            	returnValue = true;
+            	break;
+            	
+            case "dash":
+            	player.dash(10*brain.getBallDistance());
+            	returnValue = true;
+            	break;
                 
             case "move":
                 LOG.info("Are we before kickoff?");
@@ -49,40 +62,64 @@ public class SoccerEnvironment extends Environment {
                   LOG.info("We are before kickoff.");
                   player.move(-Math.random() * 52.5, 34 - Math.random() * 68.0);
                   LOG.info("I should have moved now.");
-                  return true;
+                  returnValue = true;
                 }
-                
+                break;
+
             default:
                 System.out.println("This action isn't implemented yet.");
         }
         
-        return false;
+		try {
+			Thread.sleep(2*SoccerParams.simulator_step);
+		} catch(Exception e){
+			// Do nothing if an exception is caught
+		}
+        
+        updatePercepts();
+        return returnValue;
     }
     
     /*
      * This method is used to send information back to the ASL environment.
      */
     void updatePercepts() {
-        clearPercepts();
-        
+    	// Define the belief percepts
+    	Literal seeBall = Literal.parseLiteral("seeBall(true)");
+        Literal inKickRange = Literal.parseLiteral("inKickRange(true)");
+        Literal ballCentered = Literal.parseLiteral("ballCentered(true)");
+    	Literal seeGoal = Literal.parseLiteral("seegoal(true)");
+    	
+    	// Remove the percepts, without removing those we don't want to remove
+    	removePercept(seeBall);
+    	removePercept(inKickRange);
+    	removePercept(ballCentered);
+    	removePercept(seeGoal);
+    	
+    	// Add the percepts based on the sensors.
         List<String> sensors = brain.getSensors();
         for(String sensor : sensors) {
             if(sensor == "seeball") {
-                addPercept(Literal.parseLiteral("seeball(true)"));
+            	LOG.info("Adding Percept seeBall(true)");
+                addPercept(seeBall);
             }
             
             if(sensor == "inkickrange") {
-                addPercept(Literal.parseLiteral("inkickrange(true)"));
+            	LOG.info("Adding Percept inKickRange(true)");
+                addPercept(inKickRange);
             }
             
             if(sensor == "ballcentered") {
-                addPercept(Literal.parseLiteral("ballcentered(true)"));
+            	LOG.info("Adding Percept ballCentered(true)");
+                addPercept(ballCentered);
             }
             
             if(sensor == "seegoal") {
-                addPercept(Literal.parseLiteral("seegoal(true)"));
+            	LOG.info("Adding Percept seeGoal(true)");
+                addPercept(seeGoal);
             }
         }
+        
     }
 
     /** Called before the end of MAS execution */

@@ -148,6 +148,16 @@ class Brain implements SensorInput {
         return sensors;
     }
     
+    public double getBallDirection() {
+    	ObjectInfo ball_object = m_memory.getObject("ball");    	
+    	return ball_object.m_direction;
+    }
+    
+    public double getBallDistance() {
+    	ObjectInfo ball_object = m_memory.getObject("ball");    	
+    	return ball_object.m_distance;
+    }
+    
     public boolean isTimeOver() {
         return m_timeOver;
     }

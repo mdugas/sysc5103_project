@@ -1,60 +1,71 @@
 // Player agent to interact with Robocup
 
 /* Initial beliefs and rules */
-seeball(false).
-ballcentered(false).
-inkickrange(false).
-seegoal(false).
-beforekickoff(true).
+
+// The agent believes we are before the kickoff
+beforeKickoff(true).
 
 /* Initial goals */
-!start.
+!play(x).
 
 /* Plans */
-+!start 
-	: beforekickoff(true)
+@p1
++!play(x)
+	: beforeKickoff(true)
 	<- 
+		.print("Before Kickoff");
 		move("");
-		-beforekickoff(true).
-			  
-+!main 
-	: seeball(false)
-	<- 
+		-beforeKickoff(true);
+		!play(true).
+
+@p2			  
++!play(x)
+	:
+		  ~seeBall(true)
+		& ~ballAligned(true)
+		& ~inKickRange(true)
+	<-
 		turn("");
-		!main.
-+!main
-	: 
-		seeball(true) 
-		& not ballcentered(true)
+		!play(true).
+
+@p3		
++!play(x)
+	:
+		   seeBall(true)
+		& ~ballAligned(true)
+		& ~inKickRange(true)
 	<-
 		align("");
-		!main.
-		
-+!main
+		!play(true).
+
+@p4		
++!play(x)
 	:
-		seeball(true)
-		& ballcentered(true)
-		& not inkickrange(true)
+		   seeBall(true)
+		&  ballAligned(true)
+		& ~inKickRange(true)
 	<-
 		dash("");
-		!main.
-		
-+!main
+		!play(true).
+
+@p5		
++!play(x)
 	:
-		seeball(true)
-		& ballcentered(true)
-		& inkickrange(true)
-		& not seegoal(true)
+		   seeBall(true)
+		& ~seeGoal(true)
+		&  ballAligned(true)
+		&  inKickRange(true)
 	<-
 		turn("");
-		!main.
+		!play(true).
 
-+!main
+@p6
++!play(x)
 	:
-		seeball(true)
-		& ballcentered(true)
-		& inkickrange(true)
-		& seegoal(true)
+		   seeBall(true)
+		&  seeGoal(true)
+		&  ballAligned(true)
+		&  inKickRange(true)
 	<-
 		kick("");
-		!main.
+		!play(true).
