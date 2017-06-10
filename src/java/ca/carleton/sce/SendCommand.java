@@ -6,7 +6,7 @@ package ca.carleton.sce;
 //	command to player
 //
 //***************************************************************************
-interface SendCommand
+public interface SendCommand
 {
     // This function sends move command to the server
     void move(double x, double y);

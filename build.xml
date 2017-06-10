@@ -18,14 +18,14 @@
     <property name="port" value="6000"/>
     <property name="team" value="Raven"/>
     <property name="build.dir" value="${basedir}/bin" />
-
-    <property name="jasonJar" value="lib\jason-2.1.jar"/>
+    <property name="libdir" value="${basedir}/lib"/>
 
     <path id="project.classpath">
         <pathelement location="${basedir}"/>
         <pathelement location="${build.dir}"/>
-        <pathelement location="${jasonJar}"/>
-
+        <fileset dir="${libdir}">
+            <include name="**/*.jar"/>
+        </fileset>
     </path>
 
     <!-- tasks the user can override in his/her c-build.xml script -->
