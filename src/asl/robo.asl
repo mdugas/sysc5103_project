@@ -56,7 +56,7 @@ beforeKickoff(true).
     :
           seeBall(M,D)
         & inKickRange(D)
-        & not seeGoal(true)
+        & not seeGoal(G)
 	<-
 	    .print("p5")
 		turn(40);
@@ -67,8 +67,8 @@ beforeKickoff(true).
     :
            seeBall(M,D)
         &  inKickRange(D)
-        &  seeGoal(true)
+        &  seeGoal(G)
     <-
         .print("p6")
-        kick("");
+        kick(G);
         !play.

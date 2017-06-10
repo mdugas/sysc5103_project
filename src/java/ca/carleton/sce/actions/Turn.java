@@ -21,6 +21,7 @@ public class Turn extends Action {
             return false;
         }
 
+        // Get the parameter value given by the ASL call and turn using that value as moment.
         try {
             double moment = ((NumberTerm) structure.getTerm(0)).solve();
             agent.turn(moment);
