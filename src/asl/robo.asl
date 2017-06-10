@@ -23,52 +23,47 @@ beforeKickoff(true).
 @p2			  
 +!play
     :
-          not seeBall(M,D)
+          not seeBall(Mb,Db)
     <-
-        .print("p2")
         turn(40);
         !play.
 
 @p3
 +!play
     :
-          seeBall(M,D)
-        & not aligned(M)
-        & not inKickRange(D)
+          seeBall(Mb,Db)
+        & not aligned(Mb)
+        & not inKickRange(Db)
 	<-
-        .print("p3")
-        turn(M);
+        turn(Mb);
         !play.
 
 @p4
 +!play
     :
-          seeBall(M,D)
-        & aligned(M)
-        & not inKickRange(D)
+          seeBall(Mb,Db)
+        & aligned(Mb)
+        & not inKickRange(Db)
     <-
-        .print("p4")
-        dash(D);
+        dash(10 * Db);
         !play.
 
 @p5
 +!play
     :
-          seeBall(M,D)
-        & inKickRange(D)
-        & not seeGoal(true)
+          seeBall(Mb,Db)
+        & inKickRange(Db)
+        & not seeGoal(Mg,Dg)
 	<-
-	    .print("p5")
 		turn(40);
 		!play.
 
 @p6
 +!play
     :
-           seeBall(M,D)
-        &  inKickRange(D)
-        &  seeGoal(true)
+           seeBall(Mb,Db)
+        &  inKickRange(Db)
+        &  seeGoal(Mg,Dg)
     <-
-        .print("p6")
-        kick("");
+        kick(100,Mg);
         !play.
