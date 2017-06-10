@@ -26,7 +26,7 @@ beforeKickoff(true).
         & not inKickRange(true)
     <-
         .print("p2")
-        turn("");
+        turn(40);
         !play.
 
 @p3
@@ -37,7 +37,7 @@ beforeKickoff(true).
         & not inKickRange(true)
 	<-
         .print("p3")
-        align(M);
+        turn(M);
         !play.
 
 @p4
@@ -60,7 +60,7 @@ beforeKickoff(true).
         &     inKickRange(true)
 	<-
 	    .print("p5")
-		turn("");
+		turn(40);
 		!play.
 
 @p6

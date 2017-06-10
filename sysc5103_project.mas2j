@@ -5,7 +5,7 @@ MAS sysc5103_project {
 	environment: ca.carleton.sce.SoccerEnvironment
 
 	agents:
-		agent1 player;
+		robo;
 
 	aslSourcePath:
 		"src/asl";
