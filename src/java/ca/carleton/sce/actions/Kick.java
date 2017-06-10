@@ -7,6 +7,8 @@ import jason.NoValueException;
 import jason.asSyntax.NumberTerm;
 import jason.asSyntax.Structure;
 
+import java.util.logging.Level;
+
 @SuppressWarnings("unused")
 public class Kick extends Action {
 
@@ -16,17 +18,30 @@ public class Kick extends Action {
 
     @Override
     boolean doExecute(SendCommand agent, Structure structure) {
-    	double direction = 0;
-    	
-    	// Get the parameter value given by the ASL call and kick using that value as direction.
-        try {
-            direction = ((NumberTerm) structure.getTerm(0)).solve();
-        } catch (NoValueException e) {
-            this.getLogger().log(Level.WARNING, String.format("Invalid moment for kick action: %s", structure.getTerm(0)), e);
+        if (structure.getArity() != 2) {
+            this.getLogger().log(Level.WARNING, String.format("Invalid arity for kick action: expected 2, was %s", structure.getArity()));
             return false;
         }
-    	
-        agent.kick(100, direction);
+
+        double power;
+        double direction;
+
+        try {
+            power = ((NumberTerm) structure.getTerm(0)).solve();
+        } catch (NoValueException e) {
+            this.getLogger().log(Level.WARNING, String.format("Invalid power for kick action: %s", structure.getTerm(0)), e);
+            return false;
+        }
+
+        try {
+            direction = ((NumberTerm) structure.getTerm(1)).solve();
+        } catch (NoValueException e) {
+            this.getLogger().log(Level.WARNING, String.format("Invalid direction for kick action: %s", structure.getTerm(0)), e);
+            return false;
+        }
+
+        agent.kick(power, direction);
+
         return true;
     }
 }

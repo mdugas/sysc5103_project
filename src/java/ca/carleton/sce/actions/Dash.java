@@ -23,10 +23,10 @@ public class Dash extends Action {
 
         // Get the parameter value given by the ASL call and dash using that value as distance.
         try {
-            double distance = ((NumberTerm) structure.getTerm(0)).solve();
-            agent.dash(10 * distance);
+            double power = ((NumberTerm) structure.getTerm(0)).solve();
+            agent.dash(power);
         } catch (NoValueException e) {
-            this.getLogger().log(Level.WARNING, String.format("Invalid distance for dash action: %s", structure.getTerm(0)), e);
+            this.getLogger().log(Level.WARNING, String.format("Invalid power for dash action: %s", structure.getTerm(0)), e);
             return false;
         }
 
