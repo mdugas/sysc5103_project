@@ -5,19 +5,30 @@ inKickRange(D):- D <= 1.
 aligned(M):- M == 0.
 
 // The agent believes we are before the kickoff
-beforeKickoff(true).
+//beforeKickoff(true).
 
 /* Initial goals */
 !play.
 
 /* Plans */
+@p0
++!play
+    : 
+    	gameMode(before_kick_off)
+      & seeBall(Mb,Db)
+      & aligned(Mb)
+    <-
+        turn(0);
+        !play.
+
 @p1
 +!play
-    : beforeKickoff(true)
+    : 
+       not inField
     <-
         .print("Before Kickoff");
         move(math.random(54) - 54, math.random(64) - 32);
-        -beforeKickoff(true);
+        +inField;
         !play.
 
 @p2			  
@@ -53,6 +64,7 @@ beforeKickoff(true).
           seeBall(Mb,Db)
         & aligned(Mb)
         & not inKickRange(Db)
+        & not gameMode(before_kick_off)
     <-
         dash(10 * Db);
         !play.
@@ -73,6 +85,8 @@ beforeKickoff(true).
            seeBall(Mb,Db)
         &  inKickRange(Db)
         &  seeGoal(Mg,Dg)
+        &  not gameMode(before_kick_off)
     <-
         kick(100,Mg);
-        !play.
+        !play.   
+		
