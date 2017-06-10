@@ -16,7 +16,7 @@ beforeKickoff(true).
     : beforeKickoff(true)
     <-
         .print("Before Kickoff");
-        move("");
+        move(math.random(54) - 54, math.random(64) - 32);
         -beforeKickoff(true);
         !play.
 

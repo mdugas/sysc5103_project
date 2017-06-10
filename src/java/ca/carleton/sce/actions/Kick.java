@@ -17,7 +17,7 @@ public class Kick extends Action {
     @Override
     boolean doExecute(SendCommand agent, Structure structure) {
         if (structure.getArity() != 2) {
-            this.getLogger().log(Level.WARNING, String.format("Invalid arity for dash action: expected 2, was %s", structure.getArity()));
+            this.getLogger().log(Level.WARNING, String.format("Invalid arity for kick action: expected 2, was %s", structure.getArity()));
             return false;
         }
 
@@ -27,14 +27,14 @@ public class Kick extends Action {
         try {
             power = ((NumberTerm) structure.getTerm(0)).solve();
         } catch (NoValueException e) {
-            this.getLogger().log(Level.WARNING, String.format("Invalid power for dash action: %s", structure.getTerm(0)), e);
+            this.getLogger().log(Level.WARNING, String.format("Invalid power for kick action: %s", structure.getTerm(0)), e);
             return false;
         }
 
         try {
             direction = ((NumberTerm) structure.getTerm(1)).solve();
         } catch (NoValueException e) {
-            this.getLogger().log(Level.WARNING, String.format("Invalid power for dash action: %s", structure.getTerm(0)), e);
+            this.getLogger().log(Level.WARNING, String.format("Invalid direction for kick action: %s", structure.getTerm(0)), e);
             return false;
         }
 
