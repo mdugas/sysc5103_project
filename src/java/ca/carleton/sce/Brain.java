@@ -57,6 +57,12 @@ class Brain implements SensorInput {
             sensorInfo.getGoalList().stream().filter(goal -> goal.getSide() != m_side).findAny().ifPresent(
                     goal -> percepts.add(ASSyntax.createLiteral("seeGoal", ASSyntax.createNumber(goal.getDirection()), ASSyntax.createNumber(goal.getDistance()))));
 
+            // Game mode percept
+            //if (!"before_kick_off".equals(m_playMode))
+            percepts.add(ASSyntax.createLiteral("gameMode", ASSyntax.createAtom(m_playMode)));
+            //if (m_timeOver)
+            //	percepts.add(ASSyntax.createLiteral("timeOver", ASSyntax.createAtom("true")));
+            
             sensorInfo.clear();
         });
 
@@ -92,6 +98,8 @@ class Brain implements SensorInput {
     public void hear(Message message) {
         if (message.getSender().equals(Sender.Referee) && "time_over".equals(message.getMessage())) {
             m_timeOver = true;
+        } else if (message.getSender().equals(Sender.Referee)) {
+            m_playMode = message.getMessage();
         } else {
             this.sensorInfo.lock(s -> s.hear(message));
         }
