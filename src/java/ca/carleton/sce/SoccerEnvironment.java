@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 public class SoccerEnvironment extends Environment {
 
 
-    private static final Logger LOG = Logger.getLogger(SoccerEnvironment.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SoccerEnvironment.class.getName());
     private Krislet player;
     private Brain brain;
     private Collection<Action> actions = Action.getAll();
@@ -28,14 +28,13 @@ public class SoccerEnvironment extends Environment {
         String team = "Raven";
 
         try {
-            LOG.info("Initializing phase");
-            LOG.info(hostName);
+        	LOGGER.log(Level.FINE,"Initializing phase");
+        	LOGGER.log(Level.FINE,hostName);
             player = new Krislet(InetAddress.getByName(hostName), port, team);
             brain = player.getBrain();
-            LOG.info("Initialized");
+            LOGGER.log(Level.FINE,"Initialized");
         } catch (SocketException | UnknownHostException e) {
-            // TODO Auto-generated catch block
-            LOG.log(Level.SEVERE, "Can't initialize agent!", e);
+            LOGGER.log(Level.SEVERE, "Can't initialize agent!", e);
         }
     }
 
@@ -45,7 +44,7 @@ public class SoccerEnvironment extends Environment {
                 .findAny()
                 .map(a -> a.execute(this.player, action))
                 .orElseGet(() -> {
-                    LOG.warning(String.format("Invalid action: %s", action));
+                    LOGGER.warning(String.format("Invalid action: %s", action));
                     return false;
                 });
 
@@ -65,12 +64,11 @@ public class SoccerEnvironment extends Environment {
      * This method is used to send information back to the ASL environment.
      */
     private void updatePercepts() {
-        // Remove the percepts, without removing those we don't want to remove
         this.clearPercepts("robo");
 
         this.brain.getPercepts().forEach(percept -> {
             this.addPercept("robo", percept);
-            LOG.info(String.format("Adding percept: %s", percept.toString()));
+            LOGGER.info(String.format("Adding percept: %s", percept.toString()));
         });
     }
 

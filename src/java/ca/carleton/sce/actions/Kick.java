@@ -1,5 +1,7 @@
 package ca.carleton.sce.actions;
 
+import java.util.logging.Level;
+
 import ca.carleton.sce.SendCommand;
 import jason.NoValueException;
 import jason.asSyntax.NumberTerm;

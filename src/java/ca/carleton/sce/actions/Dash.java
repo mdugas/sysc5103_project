@@ -21,6 +21,7 @@ public class Dash extends Action {
             return false;
         }
 
+        // Get the parameter value given by the ASL call and dash using that value as distance.
         try {
             double power = ((NumberTerm) structure.getTerm(0)).solve();
             agent.dash(power);

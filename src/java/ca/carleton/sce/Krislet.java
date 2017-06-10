@@ -35,72 +35,6 @@ class Krislet extends Thread implements SendCommand {
     private final static Logger LOGGER = Logger.getLogger(Krislet.class.getName());
     //===========================================================================
 
-    //===========================================================================
-    // Initialization member functions
-    //---------------------------------------------------------------------------
-    // The main application function.
-    // Command line format:
-    //
-    // krislet [-parameter value]
-    //
-    // Parameters:
-    //
-    //	host (default "localhost")
-    //		The host name can either be a machine name, such as "java.sun.com" 
-    //		or a string representing its IP address, such as "206.26.48.100."
-    //
-    //	port (default 6000)
-    //		Port number for communication with the server
-    //
-    //	team (default Kris)
-    //		Team name. This name can not contain spaces.
-    //
-    //	
-    public static void main(String a[]) throws IOException {
-        String	hostName = "";
-        int	    port = 6000;
-        String	team = "Krislet3";
-
-        try {
-            // First look for parameters
-            for( int c = 0 ; c < a.length ; c += 2 ) {
-                if( a[c].compareTo("-host") == 0 ) {
-                    hostName = a[c+1];
-                }
-                else if( a[c].compareTo("-port") == 0 ) {
-                    port = Integer.parseInt(a[c+1]);
-                }
-                else if( a[c].compareTo("-team") == 0 ) {
-                    team = a[c+1];
-                }
-                else {
-                    throw new Exception();
-                }
-            }
-        }
-        catch(Exception e) {
-            LOGGER.log(Level.SEVERE, "");
-            LOGGER.log(Level.SEVERE, "USAGE: krislet [-parameter value]");
-            LOGGER.log(Level.SEVERE, "");
-            LOGGER.log(Level.SEVERE, "    Parameters  value        default");
-            LOGGER.log(Level.SEVERE, "   ------------------------------------");
-            LOGGER.log(Level.SEVERE, "    host        host_name    localhost");
-            LOGGER.log(Level.SEVERE, "    port        port_number  6000");
-            LOGGER.log(Level.SEVERE, "    team        team_name    Kris");
-            LOGGER.log(Level.SEVERE, "");
-            LOGGER.log(Level.SEVERE, "    Example:");
-            LOGGER.log(Level.SEVERE, "      krislet -host www.host.com -port 6000 -team Poland");
-            LOGGER.log(Level.SEVERE, "    or");
-            LOGGER.log(Level.SEVERE, "      krislet -host 193.117.005.223");
-            return;
-        }
-
-        Krislet player = new Krislet(InetAddress.getByName(hostName), port, team);
-
-        // enter main loop
-        //player.mainLoop();
-    }  
-
     //---------------------------------------------------------------------------
     // This constructor opens a socket to connect with the server
     public Krislet(InetAddress host, int port, String team) throws SocketException {
@@ -122,7 +56,6 @@ class Krislet extends Thread implements SendCommand {
             parseInitCommand(new String(buffer));
             m_port = packet.getPort();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             LOGGER.log(Level.SEVERE, "Can't receive transmission from server.", e);
         }
         
@@ -137,25 +70,12 @@ class Krislet extends Thread implements SendCommand {
     }
 
 
-    //===========================================================================
-    // Protected member functions
-    //---------------------------------------------------------------------------
-    // This is main loop for player
-//    protected void mainLoop() throws IOException {
 
-//
-//        // Now we should be connected to the server
-//        // and we know which side, player number and play mode
-//        while( m_playing ) {
-//            parseSensorInformation(receive());
-//        }
-//    }
-//
-
+    // This method is a constant thread to update the sensors.
     public void run() {
         while(m_playing) {
             try {
-                LOGGER.info("Saving state to memory.");
+            	LOGGER.log(Level.FINER,"Saving state to memory.");
                 parseSensorInformation(receive());
             } catch (IOException e) {
                 // TODO Auto-generated catch block
@@ -169,7 +89,6 @@ class Krislet extends Thread implements SendCommand {
     //---------------------------------------------------------------------------
     // This function sends `move` command to the server
     public void move(double x, double y) {
-        LOGGER.info("Sent move command!");
         send("(move " + Double.toString(x) + " " + Double.toString(y) + ")");
     }
 
@@ -221,10 +140,10 @@ class Krislet extends Thread implements SendCommand {
             throw new IOException(message);
         }
 
-        LOGGER.info("Initializing the brain.");
+        LOGGER.log(Level.FINE,"Initializing the brain.");
         // initialize player's brain
         m_brain = new Brain(this, m_team, m.group(1).charAt(0), Integer.parseInt(m.group(2)), m.group(3));
-        LOGGER.info("Brain initialized");
+        LOGGER.log(Level.FINE,"Brain initialized");
     }
 
     //---------------------------------------------------------------------------
