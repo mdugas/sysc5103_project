@@ -56,7 +56,6 @@ beforeKickoff(true).
     :
               seeBall(M,D)
         & not seeGoal(true)
-        &     ballAligned(true)
         &     inKickRange(true)
 	<-
 	    .print("p5")
@@ -68,7 +67,6 @@ beforeKickoff(true).
     :
            seeBall(M,D)
         &  seeGoal(true)
-        &  ballAligned(true)
         &  inKickRange(true)
     <-
         .print("p6")
