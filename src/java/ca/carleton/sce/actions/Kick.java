@@ -17,6 +17,8 @@ public class Kick extends Action {
     @Override
     boolean doExecute(SendCommand agent, Structure structure) {
     	double direction = 0;
+    	
+    	// Get the parameter value given by the ASL call and kick using that value as direction.
         try {
             direction = ((NumberTerm) structure.getTerm(0)).solve();
         } catch (NoValueException e) {

@@ -12,7 +12,8 @@ public class Move extends Action {
 
     @Override
     boolean doExecute(SendCommand agent, Structure structure) {
-        // TODO: parameters...
+
+    	// Move to a random position on our side of the field.
         agent.move(-Math.random() * 52.5, 34 - Math.random() * 68.0);
         return true;
     }
