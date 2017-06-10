@@ -135,7 +135,9 @@ class Brain implements SensorInput {
                 }
             });
 
-            sensorInfo.getGoalList().stream().filter(goal -> goal.getSide() != m_side).findAny().ifPresent(goal -> percepts.add(Literal.parseLiteral("seeGoal(true)")));
+            sensorInfo.getGoalList().stream().filter(goal -> goal.getSide() != m_side).findAny().ifPresent(
+            		goal -> 
+            			percepts.add(ASSyntax.createLiteral("seeGoal", ASSyntax.createNumber(goal.getDirection()))));
 
             sensorInfo.clear();
         });
