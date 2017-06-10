@@ -1,6 +1,8 @@
 // Player agent to interact with Robocup
 
 /* Initial beliefs and rules */
+inKickRange(D):- D <= 1.
+aligned(M):- M == 0.
 
 // The agent believes we are before the kickoff
 beforeKickoff(true).
@@ -22,8 +24,6 @@ beforeKickoff(true).
 +!play
     :
           not seeBall(M,D)
-        & not ballAligned(true)
-        & not inKickRange(true)
     <-
         .print("p2")
         turn(40);
@@ -32,9 +32,9 @@ beforeKickoff(true).
 @p3
 +!play
     :
-              seeBall(M,D)
-        & not ballAligned(true)
-        & not inKickRange(true)
+          seeBall(M,D)
+        & not aligned(M)
+        & not inKickRange(D)
 	<-
         .print("p3")
         turn(M);
@@ -44,8 +44,8 @@ beforeKickoff(true).
 +!play
     :
           seeBall(M,D)
-        & ballAligned(true)
-        & not inKickRange(true)
+        & aligned(M)
+        & not inKickRange(D)
     <-
         .print("p4")
         dash(D);
@@ -54,9 +54,9 @@ beforeKickoff(true).
 @p5
 +!play
     :
-              seeBall(M,D)
+          seeBall(M,D)
+        & inKickRange(D)
         & not seeGoal(G)
-        &     inKickRange(true)
 	<-
 	    .print("p5")
 		turn(40);
@@ -66,8 +66,8 @@ beforeKickoff(true).
 +!play
     :
            seeBall(M,D)
+        &  inKickRange(D)
         &  seeGoal(G)
-        &  inKickRange(true)
     <-
         .print("p6")
         kick(G);
