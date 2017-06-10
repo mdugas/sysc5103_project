@@ -25,7 +25,11 @@ beforeKickoff(true).
     :
           not seeBall(Mb,Db)
     <-
-        turn(40);
+        if (ballLastSeenLeft) {
+        	turn(-40);
+        } else {
+        	turn(40);
+        }
         !play.
 
 @p3
@@ -35,6 +39,11 @@ beforeKickoff(true).
         & not aligned(Mb)
         & not inKickRange(Db)
 	<-
+        if (Mb < 0) {
+        	+ballLastSeenLeft;
+        } else {
+        	-ballLastSeenLeft;
+        }
         turn(Mb);
         !play.
 
